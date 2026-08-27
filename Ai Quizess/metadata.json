@@ -1,0 +1,6 @@
+{
+  "name": "AI Quiz Generator",
+  "description": "Generate custom 5-question multiple choice quizzes on any topic using Gemini 3.7 Flash with instant grading and explanations.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

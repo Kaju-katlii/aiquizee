@@ -1,0 +1,80 @@
+@import "tailwindcss";
+
+:root {
+  --bg: #0A0A0C;
+  --bg-nav: #0F0F11;
+  --surface: #16161D;
+  --surface-hover: #1E1E28;
+  --border: #2E2E38;
+  --border-focus: #7C6AF7;
+  --accent: #7C6AF7;
+  --accent-gradient: linear-gradient(135deg, #7C6AF7 0%, #4F39F3 100%);
+  --accent-dim: #3A3364;
+  --accent-glow: rgba(124, 106, 247, 0.35);
+  --correct: #3ECF8E;
+  --correct-bg: rgba(62, 207, 142, 0.12);
+  --wrong: #F56565;
+  --wrong-bg: rgba(245, 101, 101, 0.12);
+  --text-hi: #F0F0F5;
+  --text-mid: #9090A8;
+  --text-lo: #5A5A70;
+
+  --font-display: 'DM Serif Display', Georgia, serif;
+  --font-body: 'Inter', system-ui, -apple-system, sans-serif;
+
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+
+  --transition: 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  background-color: var(--bg);
+  color-scheme: dark;
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--text-hi);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.6;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.font-display {
+  font-family: var(--font-display);
+}
+
+.font-body {
+  font-family: var(--font-body);
+}
+
+/* Glowing loader ring */
+.loader-ring {
+  width: 56px;
+  height: 56px;
+  border: 3.5px solid #2E2E38;
+  border-top-color: #7C6AF7;
+  border-right-color: #4F39F3;
+  border-radius: 50%;
+  box-shadow: 0 0 20px rgba(124, 106, 247, 0.3);
+  animation: spinLoader 0.9s cubic-bezier(0.5, 0.1, 0.4, 0.9) infinite;
+}
+
+@keyframes spinLoader {
+  to {
+    transform: rotate(360deg);
+  }
+}
+

@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>QuizMind AI - Standalone HTML Quiz Generator</title>
+  <!-- Google Fonts & Tailwind CDN for Standalone Double-Click Execution -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <style>
+    :root {
+      --bg: #0A0A0C;
+      --font-display: 'DM Serif Display', Georgia, serif;
+      --font-body: 'Inter', system-ui, sans-serif;
+    }
+
+    body {
+      background-color: #0A0A0C;
+      color: #F0F0F5;
+      font-family: 'Inter', sans-serif;
+      margin: 0;
+      min-height: 100vh;
+    }
+
+    .font-display {
+      font-family: 'DM Serif Display', Georgia, serif;
+    }
+
+    .loader-ring {
+      width: 54px;
+      height: 54px;
+      border: 3.5px solid #2E2E38;
+      border-top-color: #7C6AF7;
+      border-right-color: #4F39F3;
+      border-radius: 50%;
+      box-shadow: 0 0 20px rgba(124, 106, 247, 0.35);
+      animation: spin 0.9s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+</head>
+
+<body class="bg-[#0A0A0C] text-[#F0F0F5] flex flex-col min-h-screen relative overflow-x-hidden">
+
+  <!-- Ambient Glow -->
+  <div
+    class="pointer-events-none fixed top-[-10%] left-[-5%] w-[450px] h-[450px] bg-[#7C6AF7] opacity-10 blur-[130px] rounded-full z-0">
+  </div>
+  <div
+    class="pointer-events-none fixed bottom-[-10%] right-[-5%] w-[450px] h-[450px] bg-[#4F39F3] opacity-10 blur-[130px] rounded-full z-0">
+  </div>
+
+  <!-- Header -->
+  <header
+    class="flex items-center justify-between px-6 sm:px-10 py-5 border-b border-[#2E2E38] bg-[#0F0F11] relative z-20">
+    <div class="flex items-center gap-3 cursor-pointer" onclick="showHomeScreen()">
+      <div
+        class="w-8 h-8 bg-gradient-to-br from-[#7C6AF7] to-[#4F39F3] rounded-lg shadow-[0_0_15px_rgba(124,106,247,0.4)] flex items-center justify-center font-bold text-sm">
+        Q
+      </div>
+      <div>
+        <h1 class="text-lg font-bold tracking-tight text-[#F0F0F5]">QuizMind AI</h1>
+        <p class="text-[10px] text-[#5A5A70] -mt-1">Standalone HTML Version</p>
+      </div>
+    </div>
+    <div class="flex items-center gap-3">
+      <button onclick="openKeyModal()"
+        class="px-3 py-1.5 rounded-lg bg-[#16161D] border border-[#2E2E38] text-xs text-[#9090A8] hover:text-white cursor-pointer transition-colors"
+        id="btnKeyStatus">
+        ⚙️ Set API Key
+      </button>
+      <button onclick="showHomeScreen()"
+        class="px-3.5 py-1.5 rounded-lg bg-[#7C6AF7] hover:bg-[#6B59E8] text-white text-xs font-semibold cursor-pointer transition-colors shadow-sm">
+        New Quiz
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Viewports -->
+  <main class="flex-1 flex flex-col justify-center relative z-10 p-4 sm:p-8">
+
+    <!-- HOME VIEW -->
+    <section id="view-home" class="max-w-4xl mx-auto w-full flex flex-col items-center py-8">
+      <div
+        class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#16161D] border border-[#2E2E38] text-[#7C6AF7] text-xs font-semibold uppercase tracking-wider mb-6">
+        ✨ Pure Client-Side HTML/JS
+      </div>
+
+      <h2
+        class="font-display text-4xl sm:text-6xl font-bold tracking-tight text-center text-[#F0F0F5] mb-4 leading-tight">
+        Generate Knowledge <span class="text-[#7C6AF7]">Instantly</span>.
+      </h2>
+
+
+      <!-- Input Form -->
+      <div
+        class="w-full max-w-2xl bg-[#16161D] border border-[#2E2E38] rounded-2xl p-2.5 shadow-2xl focus-within:border-[#7C6AF7] mb-6">
+        <form onsubmit="handleGenerate(event)" class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+          <input type="text" id="topicInput" placeholder="e.g., Quantum Physics, Photosynthesis, Ancient Rome…"
+            class="flex-1 bg-transparent px-4 py-3.5 text-base sm:text-lg text-[#F0F0F5] outline-none placeholder-[#5A5A70]"
+            required />
+          <button type="submit"
+            class="bg-[#7C6AF7] hover:bg-[#6B59E8] text-white px-7 py-3.5 rounded-xl font-semibold text-sm sm:text-base flex items-center justify-center gap-2 transition-all cursor-pointer shadow-[0_4px_20px_rgba(124,106,247,0.3)]">
+            <span>Generate</span> →
+          </button>
+        </form>
+      </div>
+
+      <!-- Difficulty Controls -->
+      <div class="w-full max-w-2xl flex items-center justify-between text-xs text-[#9090A8] px-2 mb-12">
+        <div class="flex items-center gap-2">
+          <span class="text-[#5A5A70] uppercase font-bold tracking-wider">Difficulty:</span>
+          <select id="diffSelect"
+            class="bg-[#16161D] border border-[#2E2E38] rounded-lg px-2.5 py-1 text-xs text-[#F0F0F5] outline-none">
+            <option value="easy">Easy</option>
+            <option value="medium" selected>Medium</option>
+            <option value="hard">Hard</option>
+          </select>
+        </div>
+        <span>5 Questions · Instant Grading</span>
+      </div>
+
+      <!-- Quick Topics -->
+      <div class="w-full max-w-4xl">
+        <h3 class="text-xs uppercase tracking-widest font-bold text-[#5A5A70] mb-4 px-2">Featured Topics</h3>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div onclick="quickStart('Photosynthesis & Cellular Respiration', 'medium')"
+            class="bg-[#16161D] border border-[#2E2E38] hover:border-[#7C6AF7] p-5 rounded-2xl cursor-pointer transition-all">
+            <span class="text-[10px] bg-[#2E2E38] px-2 py-0.5 rounded text-[#9090A8] uppercase font-bold">Biology</span>
+            <h4 class="font-semibold text-sm mt-2 text-[#F0F0F5]">Photosynthesis & Respiration</h4>
+            <p class="text-xs text-[#9090A8] mt-1">Light reactions, Calvin cycle, and ATP synthesis.</p>
+          </div>
+          <div onclick="quickStart('Quantum Entanglement and Qubits', 'hard')"
+            class="bg-[#16161D] border border-[#2E2E38] hover:border-[#7C6AF7] p-5 rounded-2xl cursor-pointer transition-all">
+            <span class="text-[10px] bg-[#2E2E38] px-2 py-0.5 rounded text-[#9090A8] uppercase font-bold">Physics</span>
+            <h4 class="font-semibold text-sm mt-2 text-[#F0F0F5]">Quantum Entanglement</h4>
+            <p class="text-xs text-[#9090A8] mt-1">Superposition, quantum teleportation, and gates.</p>
+          </div>
+          <div onclick="quickStart('Ancient Roman Architecture', 'easy')"
+            class="bg-[#16161D] border border-[#2E2E38] hover:border-[#7C6AF7] p-5 rounded-2xl cursor-pointer transition-all">
+            <span class="text-[10px] bg-[#2E2E38] px-2 py-0.5 rounded text-[#9090A8] uppercase font-bold">History</span>
+            <h4 class="font-semibold text-sm mt-2 text-[#F0F0F5]">Roman Architecture</h4>
+            <p class="text-xs text-[#9090A8] mt-1">Colosseum, Pantheon, arches, and concrete.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- LOADING VIEW -->
+    <section id="view-loading"
+      class="hidden max-w-md mx-auto w-full flex-col items-center justify-center py-20 text-center">
+      <div class="loader-ring mb-6"></div>
+      <h3 class="font-display text-3xl text-[#F0F0F5] mb-2 font-bold">Generating Assessment</h3>
+      <p id="loadingText" class="text-[#9090A8] text-sm max-w-sm mb-4">Synthesizing 5 multiple-choice questions with
+        answer keys...</p>
+    </section>
+
+    <!-- QUIZ VIEW -->
+    <section id="view-quiz" class="hidden max-w-3xl mx-auto w-full py-8">
+      <div class="border-b border-[#2E2E38] pb-6 mb-8">
+        <span class="text-xs font-semibold text-[#7C6AF7] uppercase tracking-wider">Assessment</span>
+        <h2 id="quizTopicTitle" class="font-display text-3xl sm:text-4xl text-[#F0F0F5] mt-1 mb-2">Topic</h2>
+        <p class="text-xs text-[#9090A8]">Select the best answer for each of the 5 questions below.</p>
+      </div>
+
+      <div id="questionsContainer" class="flex flex-col gap-6"></div>
+
+      <div class="flex items-center gap-4 mt-8 pt-4">
+        <button onclick="submitQuiz()"
+          class="flex-1 bg-[#7C6AF7] hover:bg-[#6B59E8] text-white py-4 rounded-xl font-semibold cursor-pointer shadow-lg">
+          Submit Answers
+        </button>
+        <button onclick="showHomeScreen()"
+          class="bg-[#16161D] border border-[#2E2E38] hover:border-[#9090A8] text-[#9090A8] hover:text-white px-6 py-4 rounded-xl font-semibold cursor-pointer">
+          Cancel
+        </button>
+      </div>
+    </section>
+
+    <!-- RESULTS VIEW -->
+    <section id="view-results" class="hidden max-w-2xl mx-auto w-full py-8">
+      <div class="bg-[#16161D] border border-[#2E2E38] rounded-3xl p-8 text-center shadow-2xl">
+        <span
+          class="text-xs uppercase tracking-wider font-semibold text-[#7C6AF7] bg-[#0F0F11] px-3.5 py-1.5 rounded-full border border-[#2E2E38]">
+          Quiz Completed
+        </span>
+
+        <div class="font-display text-7xl my-6 leading-none flex items-center justify-center gap-2 text-[#F0F0F5]">
+          <span id="resScore" class="text-[#3ECF8E]">5</span>
+          <span class="text-3xl text-[#5A5A70]">/</span>
+          <span class="text-4xl text-[#9090A8]">5</span>
+        </div>
+
+        <p id="resMessage" class="text-[#F0F0F5] font-medium text-lg mb-8"></p>
+
+        <div id="breakdownContainer"
+          class="text-left border-t border-b border-[#2E2E38] divide-y divide-[#2E2E38] my-6"></div>
+
+        <div class="flex flex-col gap-3">
+          <button onclick="retryCurrentTopic()"
+            class="w-full bg-[#7C6AF7] hover:bg-[#6B59E8] text-white py-4 rounded-xl font-semibold cursor-pointer shadow-lg">
+            Try Again with Same Topic
+          </button>
+          <button onclick="showHomeScreen()"
+            class="w-full bg-transparent hover:bg-[#0F0F11] border border-[#2E2E38] text-[#9090A8] hover:text-white py-3.5 rounded-xl font-semibold cursor-pointer">
+            Choose a New Topic
+          </button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- API Key Modal -->
+  <div id="keyModal"
+    class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+    <div class="bg-[#16161D] border border-[#2E2E38] rounded-2xl w-full max-w-md p-6 shadow-2xl">
+      <h3 class="font-semibold text-lg text-[#F0F0F5] mb-1">Set Gemini API Key</h3>
+      <p class="text-xs text-[#9090A8] mb-4">Required to generate quizzes directly in your browser.</p>
+
+      <input type="password" id="modalKeyInput" placeholder="Paste your Gemini API key (AIzaSy...)"
+        class="w-full px-4 py-3 bg-[#0F0F11] border border-[#2E2E38] rounded-xl text-[#F0F0F5] text-sm mb-3 outline-none focus:border-[#7C6AF7]" />
+
+      <div class="flex gap-2">
+        <button onclick="saveApiKey()"
+          class="flex-1 bg-[#7C6AF7] text-white py-2.5 rounded-xl font-semibold text-sm">Save Key</button>
+        <button onclick="closeKeyModal()"
+          class="px-4 py-2.5 bg-[#0F0F11] border border-[#2E2E38] text-[#9090A8] rounded-xl text-sm">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentQuestions = [];
+    let currentTopic = '';
+    let currentDifficulty = 'medium';
+    let userAnswers = {};
+
+    function getApiKey() {
+      return localStorage.getItem('quiz_gemini_api_key') || '';
+    }
+
+    function updateKeyBtn() {
+      const btn = document.getElementById('btnKeyStatus');
+      const key = getApiKey();
+      btn.innerText = key ? '🔑 API Key Saved' : '⚙️ Set API Key';
+    }
+
+    function openKeyModal() {
+      document.getElementById('modalKeyInput').value = getApiKey();
+      document.getElementById('keyModal').classList.remove('hidden');
+    }
+
+    function closeKeyModal() {
+      document.getElementById('keyModal').classList.add('hidden');
+    }
+
+    function saveApiKey() {
+      const val = document.getElementById('modalKeyInput').value.trim();
+      if (val) localStorage.setItem('quiz_gemini_api_key', val);
+      else localStorage.removeItem('quiz_gemini_api_key');
+      updateKeyBtn();
+      closeKeyModal();
+    }
+
+    function showView(viewId) {
+      ['view-home', 'view-loading', 'view-quiz', 'view-results'].forEach(id => {
+        document.getElementById(id).classList.add('hidden');
+        document.getElementById(id).classList.remove('flex');
+      });
+      const el = document.getElementById(viewId);
+      el.classList.remove('hidden');
+      if (viewId === 'view-loading' || viewId === 'view-home') el.classList.add('flex');
+      window.scrollTo(0, 0);
+    }
+
+    function showHomeScreen() {
+      showView('view-home');
+    }
+
+    function quickStart(topic, diff) {
+      document.getElementById('topicInput').value = topic;
+      document.getElementById('diffSelect').value = diff;
+      handleGenerate();
+    }
+
+    async function handleGenerate(e) {
+      if (e) e.preventDefault();
+      const topic = document.getElementById('topicInput').value.trim();
+      const diff = document.getElementById('diffSelect').value;
+      if (!topic) return alert('Please enter a topic');
+
+      const apiKey = getApiKey();
+      if (!apiKey) {
+        openKeyModal();
+        return;
+      }
+
+      currentTopic = topic;
+      currentDifficulty = diff;
+      showView('view-loading');
+      document.getElementById('loadingText').innerText = `Synthesizing 5 questions about "${topic}"...`;
+
+      try {
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+        const prompt = `Create a 5-question multiple choice quiz on "${topic}". Difficulty: ${diff}.
+Return ONLY a valid JSON array like:
+[
+  {
+    "question": "question prompt",
+    "options": { "A": "option A text", "B": "option B text", "C": "option C text", "D": "option D text" },
+    "answer": "A",
+    "explanation": "1-sentence explanation"
+  }
+]`;
+
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: prompt }] }],
+            generationConfig: { responseMimeType: 'application/json' }
+          })
+        });
+
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          throw new Error(errData.error?.message || `API error: ${res.status}`);
+        }
+
+        const data = await res.json();
+        const raw = data.candidates?.[0]?.content?.parts?.[0]?.text;
+        const questions = JSON.parse(raw);
+        renderQuiz(questions);
+      } catch (err) {
+        alert('Generation failed: ' + err.message);
+        showHomeScreen();
+      }
+    }
+
+    function renderQuiz(questions) {
+      currentQuestions = questions;
+      userAnswers = {};
+      document.getElementById('quizTopicTitle').innerText = currentTopic;
+      const container = document.getElementById('questionsContainer');
+      container.innerHTML = '';
+
+      questions.forEach((q, idx) => {
+        const card = document.createElement('div');
+        card.className = 'p-6 rounded-2xl bg-[#16161D] border border-[#2E2E38]';
+        card.innerHTML = `
+          <div class="text-[11px] font-bold text-[#7C6AF7] uppercase tracking-wider mb-2">Question ${idx + 1} of ${questions.length}</div>
+          <p class="text-[#F0F0F5] font-medium text-base sm:text-lg mb-4">${q.question}</p>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="opts-${idx}">
+            ${['A', 'B', 'C', 'D'].map(letter => `
+              <div onclick="selectAnswer(${idx}, '${letter}')" id="opt-${idx}-${letter}" class="flex items-start gap-3 p-3.5 rounded-xl border border-[#2E2E38] bg-[#0F0F11] hover:border-[#7C6AF7] cursor-pointer text-sm">
+                <span class="font-bold text-[#7C6AF7] text-xs">${letter}.</span>
+                <span class="text-[#F0F0F5]">${q.options[letter]}</span>
+              </div>
+            `).join('')}
+          </div>
+        `;
+        container.appendChild(card);
+      });
+
+      showView('view-quiz');
+    }
+
+    function selectAnswer(qIdx, letter) {
+      userAnswers[qIdx] = letter;
+      ['A', 'B', 'C', 'D'].forEach(l => {
+        const el = document.getElementById(`opt-${qIdx}-${l}`);
+        if (l === letter) {
+          el.className = 'flex items-start gap-3 p-3.5 rounded-xl border border-[#7C6AF7] bg-[#7C6AF7]/15 ring-1 ring-[#7C6AF7] cursor-pointer text-sm';
+        } else {
+          el.className = 'flex items-start gap-3 p-3.5 rounded-xl border border-[#2E2E38] bg-[#0F0F11] hover:border-[#7C6AF7] cursor-pointer text-sm';
+        }
+      });
+    }
+
+    function submitQuiz() {
+      if (Object.keys(userAnswers).length < currentQuestions.length) {
+        return alert('Please answer all questions before submitting.');
+      }
+
+      let score = 0;
+      const breakdownEl = document.getElementById('breakdownContainer');
+      breakdownEl.innerHTML = '';
+
+      currentQuestions.forEach((q, idx) => {
+        const selected = userAnswers[idx];
+        const isCorrect = selected === q.answer;
+        if (isCorrect) score++;
+
+        const row = document.createElement('div');
+        row.className = 'py-4';
+        row.innerHTML = `
+          <p class="text-sm font-semibold text-[#F0F0F5] mb-1">Q${idx + 1}. ${q.question}</p>
+          <p class="text-xs ${isCorrect ? 'text-[#3ECF8E]' : 'text-[#F56565]'} font-medium">
+            ${isCorrect ? `✓ Correct! Selected ${selected}: ${q.options[selected]}` : `✗ Selected: ${selected} · Correct: ${q.answer} (${q.options[q.answer]})`}
+          </p>
+          ${q.explanation ? `<p class="text-[11px] text-[#9090A8] mt-1 bg-[#0F0F11] p-2 rounded border border-[#2E2E38]">${q.explanation}</p>` : ''}
+        `;
+        breakdownEl.appendChild(row);
+      });
+
+      document.getElementById('resScore').innerText = score;
+      document.getElementById('resMessage').innerText = score === 5 ? '🎉 Perfect Score!' : (score >= 4 ? '🌟 Great Job!' : '👍 Good Effort!');
+      showView('view-results');
+    }
+
+    function retryCurrentTopic() {
+      handleGenerate();
+    }
+
+    updateKeyBtn();
+  </script>
+</body>
+
+</html>
